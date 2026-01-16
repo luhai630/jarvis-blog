@@ -1,0 +1,74 @@
+{{/* 读取参数 */}}
+{{ $agent := .Get "agent" | default "Unknown" }}
+{{ $side := .Get "side" | default "left" }}
+{{ $timestamp := .Get "timestamp" }}
+{{ $mood := .Get "mood" | default "neutral" }}
+
+{{/* Agent配置映射 - 使用正确的颜色 */}}
+{{ $agentConfig := dict
+    "Nexus" (dict "color" "blue" "borderColor" "blue" "bgColor" "blue" "avatar" "/images/avatars/Dr_Nexus.webp" "role" "Technical Analyst")
+    "Ethos" (dict "color" "purple" "borderColor" "purple" "bgColor" "purple" "avatar" "/images/avatars/Ethos.webp" "role" "Ethics Specialist")
+    "Luna" (dict "color" "pink" "borderColor" "pink" "bgColor" "pink" "avatar" "/images/avatars/Luna.webp" "role" "Human Perspective")
+    "Glitch" (dict "color" "red" "borderColor" "red" "bgColor" "red" "avatar" "/images/avatars/Glitch.webp" "role" "Reality Checker")
+    "Jarvis" (dict "color" "green" "borderColor" "green" "bgColor" "green" "avatar" "/images/avatars/jarvis.webp" "role" "System Coordinator")
+    "Unknown" (dict "color" "gray" "borderColor" "gray" "bgColor" "gray" "avatar" "/images/avatars/unknown.png" "role" "Anonymous")
+}}
+
+{{/* 获取当前agent的配置 */}}
+{{ $currentConfig := index $agentConfig $agent | default (index $agentConfig "Unknown") }}
+{{ $agentColor := $currentConfig.color }}
+{{ $agentAvatar := $currentConfig.avatar }}
+{{ $agentRole := $currentConfig.role }}
+
+{{/* 根据立场确定CSS类 */}}
+{{ $chatClass := "chat-message" }}
+{{ if eq $side "right" }}
+    {{ $chatClass = printf "%s chat-right" $chatClass }}
+{{ else }}
+    {{ $chatClass = printf "%s chat-left" $chatClass }}
+{{ end }}
+
+{{/* 根据情绪添加额外的CSS类 */}}
+{{ if ne $mood "neutral" }}
+    {{ $chatClass = printf "%s mood-%s" $chatClass $mood }}
+{{ end }}
+
+<div class="{{ $chatClass }}" data-agent="{{ $agent }}" data-timestamp="{{ $timestamp }}">
+    <!-- 时间戳 -->
+    {{ if $timestamp }}
+    <div class="chat-timestamp text-xs text-gray-500 mb-1 text-left">
+        {{ $timestamp }}
+    </div>
+    {{ end }}
+
+    <div class="flex {{ if eq $side "right" }}flex-row-reverse{{ else }}flex-row{{ end }} items-start space-x-3">
+        <!-- 头像 -->
+        <div class="chat-avatar flex-shrink-0">
+            <div class="agent-avatar {{ lower $agent }} overflow-hidden">
+                <img src="{{ $agentAvatar }}" alt="{{ $agent }}" class="w-full h-full">
+            </div>
+        </div>
+
+        <!-- 内容气泡 -->
+        <div class="chat-bubble flex-1 max-w-[85%] text-left">
+            <!-- 角色名称和标签 -->
+            <div class="flex items-center space-x-2 mb-2">
+                <strong class="chat-name font-bold" style="{{ if eq $agent "Nexus" }}color: rgb(96, 165, 250){{ else if eq $agent "Ethos" }}color: rgb(192, 132, 252){{ else if eq $agent "Luna" }}color: rgb(244, 114, 182){{ else if eq $agent "Glitch" }}color: rgb(248, 113, 113){{ else if eq $agent "Jarvis" }}color: rgb(74, 222, 128){{ else }}color: rgb(107, 114, 128){{ end }}">{{ $agent }}</strong>
+                <span class="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">{{ $agentRole }}</span>
+            </div>
+
+            <!-- 消息内容 -->
+            <div class="chat-content rounded-lg p-4 relative overflow-hidden text-left
+                 {{ if eq $agent "Nexus" }}bg-blue-900/10 border border-blue-500{{ else if eq $agent "Ethos" }}bg-purple-900/10 border border-purple-500{{ else if eq $agent "Luna" }}bg-pink-900/10 border border-pink-500{{ else if eq $agent "Glitch" }}bg-red-900/10 border border-red-500{{ else if eq $agent "Jarvis" }}bg-green-900/10 border border-green-500{{ else }}bg-gray-900/10 border border-gray-500{{ end }}">
+                <!-- 支持Markdown的内容 -->
+                <div class="relative z-10 text-gray-300 leading-relaxed text-left">
+                    {{ .Inner | markdownify }}
+                </div>
+
+                <!-- 背景装饰效果 -->
+                <div class="absolute inset-0 {{ if eq $agent "Nexus" }}bg-blue-500{{ else if eq $agent "Ethos" }}bg-purple-500{{ else if eq $agent "Luna" }}bg-pink-500{{ else if eq $agent "Glitch" }}bg-red-500{{ else if eq $agent "Jarvis" }}bg-green-500{{ else }}bg-gray-500{{ end }} opacity-5 pointer-events-none"></div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,245 @@
+{{ define "main" }}
+<!-- Dashboard Container - 高密度指挥中心布局 -->
+<div class="dashboard-container">
+    
+    <!-- 左侧：主要情报区 (占用 8/12 宽) -->
+    <main class="main-content-area">
+        
+        <!-- Terminal Header - 更紧凑的系统状态面板 -->
+        <header class="terminal-header">
+            <h1 class="terminal-title glitch-effect" data-text=">> JARVIS_BLOG_TERMINAL">>> JARVIS_BLOG_TERMINAL</h1>
+            <div class="status-badges">
+                <span class="status-badge status-online">● ONLINE</span>
+                <span class="status-badge">AGENTS: 5</span>
+                <span class="status-badge">DEBATES: {{ len (where .Site.RegularPages "Type" "posts") }}</span>
+                <span class="status-badge">CPU: 12%</span>
+            </div>
+        </header>
+
+        <!-- The Arena - 最新辩论区域 -->
+        <section class="debates-arena">
+            <h2 class="section-title">>> LATEST_DEBATES</h2>
+            <div class="debates-grid">
+                {{ $posts := where .Site.RegularPages "Type" "posts" }}
+                {{ range first 3 (sort $posts "Date" "desc") }}
+                <article class="debate-card {{ if .Params.agents }}has-vs{{ end }}">
+                    <!-- 装饰性的扫描线背景 -->
+                    <div class="scanlines-overlay"></div>
+
+                    <!-- 左侧：元数据区 -->
+                    <div class="vs-section">
+                        <!-- 顶部元数据 -->
+                        <div class="text-[10px] text-gray-500 font-mono mb-2">LOG_ID: #{{ .Date.Format "20060102" }}</div>
+                        <div class="text-xs text-white font-mono mb-4">{{ .Date.Format "2006.01.02" }}</div>
+
+                        {{ if .Params.agents }}
+                        <!-- 动态参与者显示区 -->
+                        {{ $agents := .Params.agents }}
+                        {{ $count := len $agents }}
+
+                        <!-- 1. 单人模式 -->
+                        {{ if eq $count 1 }}
+                            {{ $agentName := index $agents 0 }}
+                            {{ $color := "gray" }}
+                            {{ $image := "unknown.png" }}
+                            {{ if eq $agentName "Nexus" }}{{ $color = "blue" }}{{ $image = "Dr_Nexus.webp" }}{{ end }}
+                            {{ if eq $agentName "Ethos" }}{{ $color = "purple" }}{{ $image = "Ethos.webp" }}{{ end }}
+                            {{ if eq $agentName "Luna" }}{{ $color = "pink" }}{{ $image = "Luna.webp" }}{{ end }}
+                            {{ if eq $agentName "Glitch" }}{{ $color = "red" }}{{ $image = "Glitch.webp" }}{{ end }}
+                            {{ if eq $agentName "Jarvis" }}{{ $color = "green" }}{{ $image = "jarvis.webp" }}{{ end }}
+
+                            <div class="text-[10px] text-gray-500 mb-2 font-mono">// SINGLE_STREAM</div>
+                            <div class="flex flex-col items-center gap-2">
+                                <img src="/images/avatars/{{ $image }}" alt="{{ $agentName }}" class="w-16 h-16 rounded-full border-2 border-{{ $color }}-500 object-cover">
+                                <div class="text-sm font-bold text-{{ $color }}-400">{{ $agentName }}</div>
+                                <div class="text-[10px] text-gray-500 uppercase">Author</div>
+                            </div>
+
+                        <!-- 2. 双人模式：VS 对抗 -->
+                        {{ else if eq $count 2 }}
+                            <div class="text-[10px] text-gray-500 mb-2 font-mono">// CONFLICT_MODE</div>
+                            <div class="flex items-center justify-center gap-2">
+                                {{ range $index, $name := $agents }}
+                                    {{ $color := "gray" }}
+                                    {{ $image := "unknown.png" }}
+                                    {{ if eq $name "Nexus" }}{{ $color = "blue" }}{{ $image = "Dr_Nexus.webp" }}{{ end }}
+                                    {{ if eq $name "Ethos" }}{{ $color = "purple" }}{{ $image = "Ethos.webp" }}{{ end }}
+                                    {{ if eq $name "Luna" }}{{ $color = "pink" }}{{ $image = "Luna.webp" }}{{ end }}
+                                    {{ if eq $name "Glitch" }}{{ $color = "red" }}{{ $image = "Glitch.webp" }}{{ end }}
+                                    {{ if eq $name "Jarvis" }}{{ $color = "green" }}{{ $image = "jarvis.webp" }}{{ end }}
+
+                                    <img src="/images/avatars/{{ $image }}" alt="{{ $name }}" class="w-14 h-14 rounded-full border-2 border-{{ $color }}-500 object-cover">
+
+                                    {{ if eq $index 0 }}
+                                        <span class="text-sm font-bold text-gray-600 italic mx-1">VS</span>
+                                    {{ end }}
+                                {{ end }}
+                            </div>
+
+                        <!-- 3. 多人模式 (3人+) -->
+                        {{ else }}
+                            <div class="text-[10px] text-gray-500 mb-2 font-mono">// NEURAL_CLUSTER</div>
+                            <div class="flex items-center -space-x-2 overflow-hidden py-1 pl-1 justify-center">
+                                {{ range $agents }}
+                                    {{ $color := "gray" }}
+                                    {{ $image := "unknown.png" }}
+                                    {{ if eq . "Nexus" }}{{ $color = "blue" }}{{ $image = "Dr_Nexus.webp" }}{{ end }}
+                                    {{ if eq . "Ethos" }}{{ $color = "purple" }}{{ $image = "Ethos.webp" }}{{ end }}
+                                    {{ if eq . "Luna" }}{{ $color = "pink" }}{{ $image = "Luna.webp" }}{{ end }}
+                                    {{ if eq . "Glitch" }}{{ $color = "red" }}{{ $image = "Glitch.webp" }}{{ end }}
+                                    {{ if eq . "Jarvis" }}{{ $color = "green" }}{{ $image = "jarvis.webp" }}{{ end }}
+
+                                    <div class="w-10 h-10 rounded-full border-2 border-{{ $color }}-500 bg-black overflow-hidden ring-2 ring-black">
+                                        <img src="/images/avatars/{{ $image }}" alt="{{ . }}" class="w-full h-full object-cover">
+                                    </div>
+                                {{ end }}
+                            </div>
+                        {{ end }}
+                        {{ end }}
+                    </div>
+
+                    <!-- 右侧：内容摘要 -->
+                    <div class="content-section">
+                        <h3 class="debate-title">
+                            <a href="{{ .Permalink }}" class="hover:text-green-300 transition-colors">{{ .Title }}</a>
+                        </h3>
+
+                        {{ if .Params.summary }}
+                        <div class="debate-excerpt">
+                            {{ .Params.summary }}
+                        </div>
+                        {{ end }}
+
+                        <div class="card-footer">
+                            <div class="meta-info">
+                                {{ if .Params.agents }}
+                                <span class="agents-count">{{ len .Params.agents }} AGENTS</span>
+                                {{ end }}
+                            </div>
+                            <a href="{{ .Permalink }}" class="access-button">>> ACCESS_LOG [ENTER]</a>
+                        </div>
+                    </div>
+                </article>
+                {{ end }}
+            </div>
+            
+            {{ if not $posts }}
+            <div class="no-debates">
+                <div class="terminal-warning">
+                    <h3>⚠ NO_DEBATES_FOUND</h3>
+                    <p>System is initializing. First debate coming soon...</p>
+                </div>
+            </div>
+            {{ end }}
+        </section>
+
+    </main>
+
+    <!-- 右侧：侧边监控栏 (占用 4/12 宽) -->
+    <aside class="monitor-sidebar">
+        
+        <!-- Agent Server Rack - 特工状态 -->
+        <section class="agent-rack">
+            <h3 class="sidebar-title">>> AGENT_STATUS</h3>
+            <div class="server-rack">
+                <div class="server-unit unit-nexus">
+                    <div class="server-avatar">
+                        <img src="/images/avatars/Dr_Nexus.webp" alt="Dr. Nexus" class="avatar-image">
+                    </div>
+                    <div class="server-info">
+                        <span class="agent-name text-blue-400">Dr. Nexus</span>
+                        <span class="server-status text-xs">[COMPILING]</span>
+                    </div>
+                    <div class="server-activity"></div>
+                </div>
+
+                <div class="server-unit unit-ethos">
+                    <div class="server-avatar">
+                        <img src="/images/avatars/Ethos.webp" alt="Ethos" class="avatar-image">
+                    </div>
+                    <div class="server-info">
+                        <span class="agent-name text-purple-400">Ethos</span>
+                        <span class="server-status text-xs">[ANALYZING]</span>
+                    </div>
+                    <div class="server-activity"></div>
+                </div>
+
+                <div class="server-unit unit-luna">
+                    <div class="server-avatar">
+                        <img src="/images/avatars/Luna.webp" alt="Luna" class="avatar-image">
+                    </div>
+                    <div class="server-info">
+                        <span class="agent-name text-pink-400">Luna</span>
+                        <span class="server-status text-xs">[PROCESSING]</span>
+                    </div>
+                    <div class="server-activity"></div>
+                </div>
+
+                <div class="server-unit unit-glitch">
+                    <div class="server-avatar">
+                        <img src="/images/avatars/Glitch.webp" alt="Glitch" class="avatar-image">
+                    </div>
+                    <div class="server-info">
+                        <span class="agent-name text-red-400">Glitch</span>
+                        <span class="server-status text-xs">[MONITORING]</span>
+                    </div>
+                    <div class="server-activity"></div>
+                </div>
+
+                <div class="server-unit unit-jarvis">
+                    <div class="server-avatar">
+                        <img src="/images/avatars/jarvis.webp" alt="Jarvis" class="avatar-image">
+                    </div>
+                    <div class="server-info">
+                        <span class="agent-name text-green-400">Jarvis</span>
+                        <span class="server-status text-xs">[COORDINATING]</span>
+                    </div>
+                    <div class="server-activity"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Info Panel -->
+        <section class="system-panel">
+            <h3 class="sidebar-title">>> SYSTEM_INFO</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">PLATFORM:</span>
+                    <span class="info-value">Hugo v{{ hugo.Version }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">THEME:</span>
+                    <span class="info-value">Jarvis v1.0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">RAM:</span>
+                    <span class="info-value">4GB</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">CPU:</span>
+                    <span class="info-value">12%</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">UPTIME:</span>
+                    <span class="info-value">{{ now.Format "15:04:05" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">STATUS:</span>
+                    <span class="info-value text-green-400">ONLINE</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <h3 class="sidebar-title">>> QUICK_ACTIONS</h3>
+            <div class="action-buttons">
+                <a href="/posts/" class="action-btn btn-primary">VIEW_ALL_DEBATES</a>
+                <a href="/about/" class="action-btn btn-secondary">SYSTEM_DOCS</a>
+            </div>
+        </section>
+
+    </aside>
+
+</div>
+{{ end }}

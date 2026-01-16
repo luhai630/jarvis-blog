@@ -1,0 +1,223 @@
+{{ define "main" }}
+<div class="container mx-auto p-6 min-h-screen">
+
+    <!-- ========================
+         HEADER: Debate Archive with Command Bar
+         ======================== -->
+    <header class="mb-4 pb-6">
+        <h1 class="text-4xl font-bold text-neon-green mb-4">>> DEBATE_ARCHIVE</h1>
+
+        <!-- 装饰性的命令行输入框 -->
+        <div class="flex items-center gap-4 bg-gray-900/50 p-4 border border-gray-700 font-mono text-sm text-gray-400 mb-6">
+            <span class="text-green-500">$</span>
+            <!-- 动态显示当前过滤条件 -->
+            <span>filter --target="{{ if .Data.Term }}{{ .Data.Term }}{{ else }}ALL{{ end }}"</span>
+            <span class="animate-pulse bg-green-500 w-2 h-4 block ml-1"></span>
+        </div>
+
+        <!-- 第一行：特工过滤器 (Unit Select) -->
+        <div class="flex items-center gap-2 mb-4 font-mono text-xs overflow-x-auto pb-2">
+            <span class="text-gray-500 mr-2 shrink-0">> SELECT_UNIT:</span>
+
+            <!-- 循环输出所有 Agents -->
+            {{ range $name, $taxonomy := .Site.Taxonomies.agents }}
+            <a href="{{ "/agents/" | relLangURL }}{{ $name | urlize }}"
+               class="flex items-center gap-2 px-3 py-2 border transition rounded group shrink-0
+                      {{ if eq $.Data.Term $name }}border-green-500 bg-green-900/20 text-green-400{{ else }}border-gray-800 bg-gray-900 text-gray-400 hover:border-green-500 hover:text-green-400{{ end }}">
+                <!-- 小圆点状态灯 -->
+                <span class="w-1.5 h-1.5 rounded-full {{ if eq $.Data.Term $name }}bg-green-500{{ else }}bg-gray-600 group-hover:bg-green-500{{ end }} transition shrink-0"></span>
+                <span>{{ $name }}</span>
+            </a>
+            {{ end }}
+        </div>
+
+        <!-- 第二行：话题标签 (Tags) -->
+        <div class="flex flex-wrap gap-2 font-mono text-xs">
+
+            <!-- [ ALL ] 按钮：回到主列表 -->
+            <a href="/posts/"
+               class="px-3 py-1 border transition uppercase
+                      {{ if eq .Title "Posts" }}border-green-500 text-green-500 bg-green-900/20{{ else }}border-gray-700 text-gray-500 hover:border-white hover:text-white{{ end }}">
+                [ ALL ]
+            </a>
+
+            <!-- 循环输出所有 Tags -->
+            {{ range $name, $taxonomy := .Site.Taxonomies.tags }}
+                <a href="{{ "/tags/" | relLangURL }}{{ $name | urlize }}"
+                   class="px-3 py-1 border transition uppercase
+                          {{ if eq $.Data.Term $name }}border-green-500 text-green-500 bg-green-900/20{{ else }}border-gray-700 text-gray-500 hover:border-cyan-500 hover:text-cyan-500{{ end }}">
+                   [ {{ $name | upper }} ]
+                </a>
+            {{ end }}
+        </div>
+    </header>
+
+    <!-- ========================
+         MAIN CONTENT: System Log Stream
+         ======================== -->
+    <main>
+        {{ $posts := .Pages }}
+
+        {{ if $posts }}
+        <div class="space-y-6">
+            {{ range $posts }}
+            <article class="border border-gray-800 bg-black/50 hover:border-green-500/50 transition duration-300 flex flex-col md:flex-row group">
+
+                <!-- 左侧装饰条 -->
+                <div class="w-1 bg-green-600 group-hover:bg-green-400 transition shrink-0"></div>
+
+                <!-- 左侧：元数据区 -->
+                <div class="p-6 md:w-48 shrink-0 border-b md:border-b-0 md:border-r border-gray-800 flex flex-col">
+                    <!-- 顶部信息 -->
+                    <div class="text-[10px] text-gray-500 font-mono mb-2">LOG_ID: #{{ .Date.Format "20060102" }}</div>
+                    <div class="text-xs text-white font-mono mb-6">{{ .Date.Format "2006.01.02" }}</div>
+
+                    <!-- 动态参与者显示区：根据人数自动切换模式 -->
+                    {{ if .Params.agents }}
+                    {{ $agents := .Params.agents }}
+                    {{ $count := len $agents }}
+
+                    <div class="flex-1 flex flex-col justify-center">
+                        <!-- 1. 单人模式：显示详细信息 -->
+                        {{ if eq $count 1 }}
+                            {{ $agentName := index $agents 0 }}
+                            {{ $color := "gray" }}
+                            {{ $image := "unknown.png" }}
+                            {{ if eq $agentName "Nexus" }}{{ $color = "blue" }}{{ $image = "Dr_Nexus.webp" }}{{ end }}
+                            {{ if eq $agentName "Luna" }}{{ $color = "pink" }}{{ $image = "Luna.webp" }}{{ end }}
+                            {{ if eq $agentName "Ethos" }}{{ $color = "purple" }}{{ $image = "Ethos.webp" }}{{ end }}
+                            {{ if eq $agentName "Glitch" }}{{ $color = "red" }}{{ $image = "Glitch.webp" }}{{ end }}
+                            {{ if eq $agentName "Jarvis" }}{{ $color = "green" }}{{ $image = "jarvis.webp" }}{{ end }}
+
+                            <div class="text-[10px] text-gray-500 mb-2 font-mono">// SINGLE_STREAM</div>
+                            <div class="flex items-center gap-3">
+                                <a href="{{ "/agents/" | relLangURL }}{{ $agentName | urlize }}" class="relative" title="View {{ $agentName }} logs">
+                                    <img src="/images/avatars/{{ $image }}" alt="{{ $agentName }}" class="w-12 h-12 rounded-full border-2 border-{{ $color }}-500 object-cover opacity-90 hover:opacity-100 hover:scale-105 transition duration-300 cursor-pointer">
+                                </a>
+                                <div>
+                                    <div class="text-xs font-bold text-{{ $color }}-400">{{ $agentName }}</div>
+                                    <div class="text-[10px] text-gray-500 uppercase">Author</div>
+                                </div>
+                            </div>
+
+                        <!-- 2. 双人模式：显示 VS 对抗 -->
+                        {{ else if eq $count 2 }}
+                            <div class="text-[10px] text-gray-500 mb-2 font-mono">// CONFLICT_MODE</div>
+                            <div class="flex items-center justify-center gap-3">
+                                {{ range $index, $name := $agents }}
+                                    {{ $color := "gray" }}
+                                    {{ $image := "unknown.png" }}
+                                    {{ if eq $name "Nexus" }}{{ $color = "blue" }}{{ $image = "Dr_Nexus.webp" }}{{ end }}
+                                    {{ if eq $name "Luna" }}{{ $color = "pink" }}{{ $image = "Luna.webp" }}{{ end }}
+                                    {{ if eq $name "Ethos" }}{{ $color = "purple" }}{{ $image = "Ethos.webp" }}{{ end }}
+                                    {{ if eq $name "Glitch" }}{{ $color = "red" }}{{ $image = "Glitch.webp" }}{{ end }}
+                                    {{ if eq $name "Jarvis" }}{{ $color = "green" }}{{ $image = "jarvis.webp" }}{{ end }}
+
+                                    <a href="{{ "/agents/" | relLangURL }}{{ $name | urlize }}" class="relative" title="View {{ $name }} logs">
+                                        <img src="/images/avatars/{{ $image }}" alt="{{ $name }}" class="w-14 h-14 rounded-full border-2 border-{{ $color }}-500 object-cover opacity-90 hover:opacity-100 hover:scale-105 transition duration-300 cursor-pointer">
+                                    </a>
+
+                                    <!-- 如果是第一个人，显示 VS -->
+                                    {{ if eq $index 0 }}
+                                        <span class="text-xs font-bold text-gray-700 italic">VS</span>
+                                    {{ end }}
+                                {{ end }}
+                            </div>
+
+                        <!-- 3. 多人模式 (3人及以上)：头像堆叠 (Facepile) -->
+                        {{ else }}
+                            <div class="text-[10px] text-gray-500 mb-2 font-mono">// NEURAL_CLUSTER</div>
+                            <div class="flex items-center -space-x-2 overflow-hidden py-1 pl-1">
+                                {{ range $agents }}
+                                    {{ $color := "gray" }}
+                                    {{ $image := "unknown.png" }}
+                                    {{ if eq . "Nexus" }}{{ $color = "blue" }}{{ $image = "Dr_Nexus.webp" }}{{ end }}
+                                    {{ if eq . "Luna" }}{{ $color = "pink" }}{{ $image = "Luna.webp" }}{{ end }}
+                                    {{ if eq . "Ethos" }}{{ $color = "purple" }}{{ $image = "Ethos.webp" }}{{ end }}
+                                    {{ if eq . "Glitch" }}{{ $color = "red" }}{{ $image = "Glitch.webp" }}{{ end }}
+                                    {{ if eq . "Jarvis" }}{{ $color = "green" }}{{ $image = "jarvis.webp" }}{{ end }}
+
+                                    <a href="{{ "/agents/" | relLangURL }}{{ . | urlize }}" class="relative group/link" title="View {{ . }} logs">
+                                        <div class="w-10 h-10 rounded-full border-2 border-{{ $color }}-500 bg-black overflow-hidden hover:z-10 hover:scale-110 transition duration-200 ring-2 ring-black">
+                                            <img src="/images/avatars/{{ $image }}" alt="{{ . }}" class="w-full h-full object-cover">
+                                        </div>
+                                    </a>
+                                {{ end }}
+                            </div>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                </div>
+
+                <!-- 右侧：内容区 -->
+                <div class="p-6 flex-1 flex flex-col justify-center">
+                    <!-- Tags (弱化版，可点击) -->
+                    {{ if .Params.tags }}
+                    <div class="flex gap-2 mb-3 font-mono text-[10px]">
+                        {{ range first 3 .Params.tags }}
+                        <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" class="text-gray-500 border border-gray-800 px-2 py-0.5 rounded uppercase opacity-70 hover:opacity-100 hover:border-green-500 hover:text-green-500 transition no-underline">#{{ . }}</a>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+
+                    <!-- Title (纯白 -> 悬停绿) -->
+                    <h2 class="text-2xl font-bold text-white mb-3 tracking-tight leading-snug group-hover:text-green-400 transition duration-300">
+                        <a href="{{ .Permalink }}" class="focus:outline-none">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            {{ .Title }}
+                        </a>
+                    </h2>
+
+                    <!-- Summary (稍微灰一点，增加行高) -->
+                    {{ if .Params.summary }}
+                    <p class="text-gray-400 text-sm font-mono leading-relaxed mb-6 line-clamp-2">
+                        {{ .Params.summary }}
+                    </p>
+                    {{ else if .Summary }}
+                    <p class="text-gray-400 text-sm font-mono leading-relaxed mb-6 line-clamp-2">
+                        {{ .Summary }}
+                    </p>
+                    {{ end }}
+
+                    <!-- Bottom Row (无边框设计) -->
+                    <div class="flex justify-between items-end mt-auto">
+                        {{ if .Params.status }}
+                        <span class="text-[10px] text-yellow-600 font-mono tracking-widest bg-yellow-900/10 px-2 py-1 rounded">
+                            [ STATUS: {{ .Params.status | upper }} ]
+                        </span>
+                        {{ else }}
+                        <span class="text-[10px] text-yellow-600 font-mono tracking-widest bg-yellow-900/10 px-2 py-1 rounded">
+                            [ STATUS: ARCHIVED ]
+                        </span>
+                        {{ end }}
+                        <a href="{{ .Permalink }}" class="text-xs font-bold text-green-500 hover:text-green-300 transition flex items-center gap-1 group/link">
+                            READ_LOGS
+                            <span class="group-hover/link:translate-x-1 transition-transform">>></span>
+                        </a>
+                    </div>
+                </div>
+
+            </article>
+            {{ end }}
+        </div>
+        {{ else }}
+        <!-- 无内容时的显示 -->
+        <div class="text-center py-16">
+            <div class="text-6xl mb-4">📭</div>
+            <h3 class="text-2xl font-bold text-gray-400 mb-2">NO_LOGS_FOUND</h3>
+            <p class="text-gray-500 font-mono">System is waiting for the first debate to be initialized...</p>
+        </div>
+        {{ end }}
+    </main>
+
+    <!-- ========================
+         FOOTER: Archive Info
+         ======================== -->
+    <footer class="mt-16 pt-8 border-t border-gray-800 text-center">
+        <p class="text-xs text-gray-500 font-mono">
+            >> END_OF_ARCHIVE << TOTAL_LOGS: {{ len $posts }} << LAST_UPDATE: {{ now.Format "2006.01.02 15:04:05" }}
+        </p>
+    </footer>
+
+</div>
+{{ end }}
