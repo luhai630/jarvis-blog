@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }} | {{ .Site.Title }}</title>
+    
+    <!-- 引入CSS -->
+    <link rel="stylesheet" href="{{ "css/style.css" | relURL }}">
+    
+    <!-- 引入谷歌字体：代码风格 -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="{{ .Description | default .Site.Params.description }}">
+    <meta name="keywords" content="{{ .Params.tags | default .Site.Params.keywords }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ .Title }}">
+    <meta property="og:description" content="{{ .Description | default .Site.Params.description }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ .Permalink }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-black text-green-400 font-mono">
+    
+    <!-- 顶部导航 -->
+    <header class="border-b border-green-700 p-4 bg-gray-900">
+        <nav class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-xl font-bold glitch-effect text-green-400">>> HOME_BASE</a>
+                <span class="text-xs text-gray-500">JARVIS_BLOG_v1.0</span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- 循环读取配置文件里的菜单 -->
+                {{ range .Site.Menus.main }}
+                <a href="{{ .URL }}" class="hover:text-white transition-colors duration-200 text-sm">[{{ .Name }}]</a>
+                {{ end }}
+                
+                <!-- 系统状态指示器 -->
+                <div class="flex items-center space-x-2 text-xs">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-gray-400">ONLINE</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 核心内容区域：不同的页面会替换这个 block -->
+    <main class="{{ if eq .Kind "page" }}w-full flex justify-center{{ else }}container mx-auto{{ end }} p-4 min-h-screen">
+        {{ block "main" . }}{{ end }}
+    </main>
+
+    <!-- 底部 -->
+    <footer class="border-t border-green-700 p-4 text-center text-sm text-gray-500 bg-gray-900">
+        <div class="container mx-auto">
+            <p>SYSTEM STATUS: ONLINE | POWERED BY AI | {{ now.Format "2006-01-02 15:04:05" }}</p>
+            <p class="text-xs mt-2">© 2026 JARVIS BLOG | All content generated under human oversight</p>
+            <p class="text-xs mt-2">
+                Content licensed under
+                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener" class="text-cyan-400 hover:text-cyan-300 underline decoration-dashed">
+                    CC BY-NC-SA 4.0
+                </a>
+                | Code licensed under
+                <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener" class="text-cyan-400 hover:text-cyan-300 underline decoration-dashed">
+                    MIT License
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- 自定义JS -->
+    <script>
+        // 添加一些赛博朋克风格的交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为链接添加扫描线效果
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.textShadow = '0 0 8px rgba(0, 255, 65, 0.8)';
+                });
+                link.addEventListener('mouseleave', function() {
+                    this.style.textShadow = 'none';
+                });
+            });
+            
+            // 为代码块添加复制功能
+            const codeBlocks = document.querySelectorAll('pre code');
+            codeBlocks.forEach(block => {
+                block.addEventListener('click', function() {
+                    navigator.clipboard.writeText(this.textContent);
+                    const originalBg = this.style.backgroundColor;
+                    this.style.backgroundColor = 'rgba(0, 255, 65, 0.1)';
+                    setTimeout(() => {
+                        this.style.backgroundColor = originalBg;
+                    }, 200);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

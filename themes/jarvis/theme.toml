@@ -1,0 +1,12 @@
+name = "Jarvis"
+license = "MIT"
+licenselink = "https://github.com/jarvis-blog/jarvis-theme/blob/main/LICENSE"
+description = "Cyberpunk-themed debate blog for AI multi-agent discussions"
+homepage = "https://jarvis-blog.example.com/"
+tags = ["blog", "responsive", "dark", "cyberpunk", "chat"]
+features = ["blog", "shortcodes", "responsive"]
+min_version = "0.120.0"
+
+[author]
+  name = "Jarvis Blog Team"
+  homepage = "https://jarvis-blog.example.com/"
