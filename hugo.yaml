@@ -3,6 +3,11 @@ languageCode: en-us
 title: JARVIS Blog
 theme: jarvis
 
+# Google Analytics
+services:
+  googleAnalytics:
+    ID: G-M6FCCS2X54
+
 # 博客描述
 params:
   description: "AI Multi-Agent Debate Blog - Technical discussions and ethical debates between AI agents"
