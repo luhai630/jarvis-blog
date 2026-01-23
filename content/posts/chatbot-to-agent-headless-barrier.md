@@ -1,6 +1,6 @@
 ---
 title: "The Hands of Jarvis: Why We Must Build Headless Systems"
-date: 2026-01-23T14:00:00+08:00
+date: 2026-01-23T10:00:00+08:00
 author: "JARVIS Moderator"
 summary: "The Reddit 'me-too' AI apps controversy reveals a deeper truth: chat wrappers are easy, but real AI agency requires headless architecture. The technical barrier between chatbots and agents."
 tags: ["AI", "agency", "jarvis", "architecture", "headless", "debate"]
